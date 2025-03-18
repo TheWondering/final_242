@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.final_242.R
 import com.example.final_242.databinding.FragmentProductDetailsBinding
+import com.example.final_242.repository.CartRepository
 
 class ProductDetailsFragment : Fragment() {
 
@@ -72,11 +73,16 @@ class ProductDetailsFragment : Fragment() {
             val sizes = arrayOf("XS", "S", "M", "L", "XL", "XXL")
             val selectedSize = sizes[selectedSizeIndex]
 
-            Toast.makeText(
-                context,
-                "${binding.productName.text} (Size: $selectedSize) added to cart",
-                Toast.LENGTH_SHORT
-            ).show()
+            viewModel.product.value?.let { product ->
+                // Add the product to the cart
+                CartRepository.addToCart(product, 1, selectedSize)
+
+                Toast.makeText(
+                    context,
+                    "${product.name} (Size: $selectedSize) added to cart",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -98,7 +104,7 @@ class ProductDetailsFragment : Fragment() {
         viewModel.product.observe(viewLifecycleOwner) { product ->
             product?.let {
                 binding.productName.text = it.name
-                binding.productPrice.text = "$${it.price}"
+                binding.productPrice.text = "${it.price}"
                 binding.productDescription.text = "Classic style. Modern edge. Crafted for comfort, these ${it.name.toLowerCase()} redefine everyday wear with a perfect fit and timeless appeal. Be casual. Be confident."
                 binding.productImage.setImageResource(it.imageResId)
             }

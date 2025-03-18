@@ -31,13 +31,12 @@ class ProductAdapter(
             .inflate(R.layout.item_product, parent, false)
         return ProductViewHolder(view)
     }
-
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = products[position]
 
         holder.productImage.setImageResource(product.imageResId)
         holder.productName.text = product.name
-        holder.productPrice.text = "$${product.price}"
+        holder.productPrice.text = "${product.price}"
 
         // Update favorite icon based on product state
         updateFavoriteIcon(holder.favoriteButton, product.isFavorite)
@@ -54,16 +53,13 @@ class ProductAdapter(
 
         // Set click listener for the entire item to navigate to details
         holder.itemView.setOnClickListener {
-            // Create a bundle with the product ID
             val bundle = bundleOf("productId" to product.id)
-            // Navigate to the product details fragment with the bundle
             holder.itemView.findNavController().navigate(
                 R.id.action_navigation_home_to_productDetailsFragment,
                 bundle
             )
         }
     }
-
     private fun updateFavoriteIcon(button: ImageButton, isFavorite: Boolean) {
         if (isFavorite) {
             button.setColorFilter(button.context.getResources().getColor(android.R.color.holo_red_light, null))

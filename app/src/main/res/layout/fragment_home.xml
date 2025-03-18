@@ -19,6 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Search Bar with Clear and Filter Buttons -->
     <androidx.cardview.widget.CardView
         android:id="@+id/search_bar_container"
         android:layout_width="0dp"
@@ -49,17 +50,38 @@
 
             <EditText
                 android:id="@+id/search_edit_text"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
+                android:layout_weight="1"
                 android:background="@null"
                 android:hint="Search"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:textColorHint="#AAAAAA"
                 android:textSize="16sp" />
+
+            <ImageButton
+                android:id="@+id/clear_search_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_clear"
+                android:tint="#AAAAAA"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/filter_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_filter"
+                android:tint="#AAAAAA" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
 
     <HorizontalScrollView
         android:id="@+id/category_scroll"

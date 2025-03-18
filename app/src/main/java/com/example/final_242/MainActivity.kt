@@ -8,6 +8,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.final_242.databinding.ActivityMainBinding
+import com.example.final_242.repository.CartRepository
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,11 +31,20 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_cart, R.id.navigation_profile
             )
         )
-        // Remove this line to prevent setting up the ActionBar with the navigation controller
-        // setupActionBarWithNavController(navController, appBarConfiguration)
 
-        // Or alternatively, hide the ActionBar completely
+        // Hide the ActionBar
         supportActionBar?.hide()
 
-        navView.setupWithNavController(navController)    }
-}
+        navView.setupWithNavController(navController)
+
+        // Observe cart items to update badge
+        CartRepository.cartItemsLiveData.observe(this) { cartItems ->
+            val badge = navView.getOrCreateBadge(R.id.navigation_cart)
+            if (cartItems.isEmpty()) {
+                badge.isVisible = false
+            } else {
+                badge.isVisible = true
+                badge.number = cartItems.sumOf { it.quantity }
+            }
+        }
+    }}

@@ -10,17 +10,15 @@
         android:id="@+id/navigation_grid"
         android:icon="@drawable/ic_grid_black_24dp"
         android:title="@string/title_categories" />
-
     <item
         android:id="@+id/navigation_favorites"
-        android:icon="@drawable/ic_heart_black_24dp"
+        android:icon="@drawable/ic_heart"
         android:title="@string/title_favorites" />
 
     <item
         android:id="@+id/navigation_cart"
-        android:icon="@drawable/ic_bag_black_24dp"
+        android:icon="@drawable/ic_shopping_bag"
         android:title="@string/title_cart" />
-
     <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_person_black_24dp"
