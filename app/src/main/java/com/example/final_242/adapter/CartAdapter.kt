@@ -11,6 +11,7 @@ import com.example.final_242.R
 import com.example.final_242.model.CartItem
 import java.text.NumberFormat
 import java.util.Currency
+import com.bumptech.glide.Glide
 
 class CartAdapter(
     private var cartItems: List<CartItem>,
@@ -35,47 +36,54 @@ class CartAdapter(
         return CartViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: CartViewHolder, position: Int) {
-        val cartItem = cartItems[position]
-        val product = cartItem.product
 
-        // Set product image and details
-        holder.productImage.setImageResource(product.imageResId)
-        holder.productName.text = product.name
-        holder.productDetails.text = "Color: ${cartItem.color}, Size: ${cartItem.size}"
 
-        // Set quantity
-        holder.quantityText.text = cartItem.quantity.toString()
+        override fun onBindViewHolder(holder: CartViewHolder, position: Int) {
+            val cartItem = cartItems[position]
+            val product = cartItem.product
 
-        // Set price
-        val format = NumberFormat.getCurrencyInstance()
-        format.currency = Currency.getInstance("USD")
-        holder.productPrice.text = format.format(cartItem.totalPrice)
+            // Set product image and details
+                // Load image using Glide
+                Glide.with(holder.itemView.context)
+                    .load(product.imageUrl)
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(holder.productImage)
+            holder.productName.text = product.name
+            holder.productDetails.text = "Color: ${cartItem.color}, Size: ${cartItem.size}"
 
-        // Setup quantity buttons
-        holder.decreaseButton.isEnabled = cartItem.quantity > 1
-        holder.decreaseButton.alpha = if (cartItem.quantity > 1) 1.0f else 0.5f
+            // Set quantity
+            holder.quantityText.text = cartItem.quantity.toString()
 
-        holder.decreaseButton.setOnClickListener {
-            if (cartItem.quantity > 1) {
-                onQuantityChanged(cartItem, cartItem.quantity - 1)
+            // Set price
+            val format = NumberFormat.getCurrencyInstance()
+            format.currency = Currency.getInstance("USD")
+            holder.productPrice.text = format.format(cartItem.totalPrice)
+
+            // Setup quantity buttons
+            holder.decreaseButton.isEnabled = cartItem.quantity > 1
+            holder.decreaseButton.alpha = if (cartItem.quantity > 1) 1.0f else 0.5f
+
+            holder.decreaseButton.setOnClickListener {
+                if (cartItem.quantity > 1) {
+                    onQuantityChanged(cartItem, cartItem.quantity - 1)
+                }
+            }
+
+            holder.increaseButton.setOnClickListener {
+                onQuantityChanged(cartItem, cartItem.quantity + 1)
+            }
+
+            // Setup delete button
+            holder.deleteButton.setOnClickListener {
+                onItemRemoved(cartItem)
             }
         }
 
-        holder.increaseButton.setOnClickListener {
-            onQuantityChanged(cartItem, cartItem.quantity + 1)
-        }
+        override fun getItemCount() = cartItems.size
 
-        // Setup delete button
-        holder.deleteButton.setOnClickListener {
-            onItemRemoved(cartItem)
+        fun updateCartItems(newCartItems: List<CartItem>) {
+            cartItems = newCartItems
+            notifyDataSetChanged()
         }
     }
-
-    override fun getItemCount() = cartItems.size
-
-    fun updateCartItems(newCartItems: List<CartItem>) {
-        cartItems = newCartItems
-        notifyDataSetChanged()
-    }
-}

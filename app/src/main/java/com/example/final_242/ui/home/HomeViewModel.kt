@@ -1,52 +1,49 @@
 package com.example.final_242.ui.home
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.final_242.R
 import com.example.final_242.model.Product
+import com.example.final_242.repository.ProductRepository
 
 class HomeViewModel : ViewModel() {
 
-    private val _products = MutableLiveData<List<Product>>()
+    private val _products = MediatorLiveData<List<Product>>()
     val products: LiveData<List<Product>> = _products
 
-    private val allProducts = listOf(
-        Product(1, "Slim Fit Chino Trousers", 59.99, R.drawable.placeholder_image, "man"),
-        Product(2, "Denim Jacket", 79.99, R.drawable.placeholder_image, "woman"),
-        Product(3, "Cotton T-Shirt", 24.99, R.drawable.placeholder_image, "man"),
-        Product(4, "Floral Dress", 49.99, R.drawable.placeholder_image, "woman"),
-        Product(5, "Leather Boots", 89.99, R.drawable.placeholder_image, "man"),
-        Product(6, "Wool Sweater", 64.99, R.drawable.placeholder_image, "woman"),
-        Product(7, "Casual Shorts", 34.99, R.drawable.placeholder_image, "boy"),
-        Product(8, "Summer Hat", 19.99, R.drawable.placeholder_image, "girl")
-    )
+    private val _loading = MutableLiveData<Boolean>()
+    val loading: LiveData<Boolean> = _loading
 
-    private var currentCategory: String = ""
+    // Use a Set to store selected categories
+    private val selectedCategories = mutableSetOf<String>()
     private var currentSearchQuery: String = ""
     private var currentMinPrice: Double = 0.0
-    private var currentMaxPrice: Double = 300.0
+    private var currentMaxPrice: Double = Double.MAX_VALUE
+
+    // Use the ProductRepository instead of hardcoded products
+    private val productRepository = ProductRepository.getInstance()
+    private var allProducts = listOf<Product>()
 
     init {
-        loadProducts()
-    }
+        _loading.value = true
 
-    private fun loadProducts() {
-        _products.value = allProducts
-    }
+        // Add the repository's products as a source to the MediatorLiveData
+        _products.addSource(productRepository.products) { products ->
+            allProducts = products
+            applyAllFilters()
+            _loading.value = false
+        }
 
-
-    // Add this method to the HomeViewModel class
-    fun clearSearch() {
-        currentSearchQuery = ""
-        applyAllFilters()
+        // Also observe the loading state from the repository
+        _loading.value = productRepository.loading.value ?: true
     }
-    private val selectedCategories = mutableSetOf<String>()
 
     fun getCurrentCategory(): String {
         return if (selectedCategories.size == 1) selectedCategories.first() else ""
     }
 
+    // Add this method to get all selected categories
     fun getSelectedCategories(): Set<String> {
         return selectedCategories.toSet()
     }
@@ -64,6 +61,7 @@ class HomeViewModel : ViewModel() {
         applyAllFilters()
     }
 
+    // Method to apply filters with a Set of categories
     fun applyFilters(categories: Set<String>, minPrice: Double, maxPrice: Double) {
         selectedCategories.clear()
         selectedCategories.addAll(categories)
@@ -72,20 +70,28 @@ class HomeViewModel : ViewModel() {
         applyAllFilters()
     }
 
+    // Overloaded method for just price filters
+    fun applyFilters(minPrice: Double, maxPrice: Double) {
+        currentMinPrice = minPrice
+        currentMaxPrice = maxPrice
+        applyAllFilters()
+    }
+
     private fun applyAllFilters() {
         var filteredProducts = allProducts
 
-        // Apply category filter
+        // Apply category filter if set
         if (selectedCategories.isNotEmpty()) {
             filteredProducts = filteredProducts.filter {
                 selectedCategories.contains(it.category.toLowerCase())
             }
         }
 
-        // Apply search filter
+        // Apply search filter if set
         if (currentSearchQuery.isNotEmpty()) {
             filteredProducts = filteredProducts.filter {
-                it.name.toLowerCase().contains(currentSearchQuery)
+                it.name.toLowerCase().contains(currentSearchQuery) ||
+                it.description?.toLowerCase()?.contains(currentSearchQuery) == true
             }
         }
 
@@ -95,5 +101,16 @@ class HomeViewModel : ViewModel() {
         }
 
         _products.value = filteredProducts
+    }
+
+    fun clearSearch() {
+        currentSearchQuery = ""
+        applyAllFilters()
+    }
+
+    // Add a method to refresh products if needed
+    fun refreshProducts() {
+        _loading.value = true
+        productRepository.fetchAllProducts()
     }
 }

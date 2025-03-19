@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.final_242.R
 import com.example.final_242.model.Product
 
@@ -31,10 +32,17 @@ class ProductAdapter(
             .inflate(R.layout.item_product, parent, false)
         return ProductViewHolder(view)
     }
+
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = products[position]
 
-        holder.productImage.setImageResource(product.imageResId)
+        // Load image from URL using Glide
+        Glide.with(holder.itemView.context)
+            .load(product.imageUrl)
+            .placeholder(R.drawable.placeholder_image)
+            .error(R.drawable.placeholder_image)
+            .into(holder.productImage)
+
         holder.productName.text = product.name
         holder.productPrice.text = "${product.price}"
 
@@ -60,6 +68,7 @@ class ProductAdapter(
             )
         }
     }
+
     private fun updateFavoriteIcon(button: ImageButton, isFavorite: Boolean) {
         if (isFavorite) {
             button.setColorFilter(button.context.getResources().getColor(android.R.color.holo_red_light, null))

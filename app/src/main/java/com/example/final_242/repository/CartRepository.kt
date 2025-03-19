@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import com.example.final_242.model.CartItem
 import com.example.final_242.model.Product
 
-// Singleton pattern for cart repository
 object CartRepository {
 
     private val cartItems = mutableListOf<CartItem>()
@@ -63,5 +62,10 @@ object CartRepository {
     private fun updateLiveData() {
         _cartItemsLiveData.value = cartItems.toList()
         _totalPrice.value = cartItems.sumOf { it.totalPrice }
+    }
+
+    // Singleton pattern
+    fun getInstance(): CartRepository {
+        return this
     }
 }

@@ -76,9 +76,19 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.final_242.ui.notifications.NotificationsFragment"
-        android:label="@string/title_profile"
-        tools:layout="@layout/fragment_notifications" />
+        android:name="com.example.final_242.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_navigation_profile_to_ordersFragment"
+            app:destination="@id/ordersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ordersFragment"
+        android:name="com.example.final_242.ui.orders.OrdersFragment"
+        android:label="Orders"
+        tools:layout="@layout/fragment_orders" />
 
     <fragment
         android:id="@+id/productDetailsFragment"

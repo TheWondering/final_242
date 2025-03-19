@@ -134,7 +134,6 @@ class HomeFragment : Fragment() {
 
         val categoryViews = listOf(categoryMen, categoryWomen, categoryBoys, categoryGirls)
         val categoryValues = listOf("man", "woman", "boy", "girl")
-
         // Set initial selection based on current filters
         val selectedCategories = homeViewModel.getSelectedCategories().toMutableSet()
 
@@ -183,23 +182,6 @@ class HomeFragment : Fragment() {
             updatePriceRangeText(priceRangeText, minPrice, maxPrice)
         }
 
-        applyButton?.setOnClickListener {
-            // Apply filters
-            homeViewModel.applyFilters(selectedCategories, minPrice.toDouble(), maxPrice.toDouble())
-
-            // Update category selection in main UI if needed
-            if (selectedCategories.isEmpty()) {
-                updateCategorySelection(0) // Select "All"
-            } else if (selectedCategories.size == 1) {
-                updateCategorySelectionByName(selectedCategories.first())
-            } else {
-                // If multiple categories selected, just select "All" in the main UI
-                updateCategorySelection(0)
-            }
-
-            // Dismiss dialog
-            filterDialog?.dismiss()
-        }
         applyButton?.setOnClickListener {
             // Apply filters
             homeViewModel.applyFilters(setOf(selectedCategoryInFilter).filter { it.isNotEmpty() }.toSet(), minPrice.toDouble(), maxPrice.toDouble())
@@ -311,6 +293,10 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         homeViewModel.products.observe(viewLifecycleOwner) { products ->
             productAdapter.updateProducts(products)
+        }
+
+        homeViewModel.loading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
     }
 

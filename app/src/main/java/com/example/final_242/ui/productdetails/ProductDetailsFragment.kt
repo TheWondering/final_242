@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.final_242.R
 import com.example.final_242.databinding.FragmentProductDetailsBinding
 import com.example.final_242.repository.CartRepository
@@ -34,11 +35,16 @@ class ProductDetailsFragment : Fragment() {
         val root: View = binding.root
 
         // Get product ID from arguments
-        val productId = arguments?.getInt("productId") ?: 1
+        val productId = arguments?.getString("productId") ?: ""
         Log.d("ProductDetailsFragment", "Received product ID: $productId")
 
-        // Load the product
-        viewModel.loadProduct(productId)
+        if (productId.isNotEmpty()) {
+            // Load the product
+            viewModel.loadProduct(productId)
+        } else {
+            Toast.makeText(context, "Product not found", Toast.LENGTH_SHORT).show()
+            findNavController().navigateUp()
+        }
 
         setupViews()
         observeViewModel()
@@ -75,7 +81,7 @@ class ProductDetailsFragment : Fragment() {
 
             viewModel.product.value?.let { product ->
                 // Add the product to the cart
-                CartRepository.addToCart(product, 1, selectedSize)
+                CartRepository.getInstance().addToCart(product, 1, selectedSize)
 
                 Toast.makeText(
                     context,
@@ -104,9 +110,38 @@ class ProductDetailsFragment : Fragment() {
         viewModel.product.observe(viewLifecycleOwner) { product ->
             product?.let {
                 binding.productName.text = it.name
-                binding.productPrice.text = "${it.price}"
-                binding.productDescription.text = "Classic style. Modern edge. Crafted for comfort, these ${it.name.toLowerCase()} redefine everyday wear with a perfect fit and timeless appeal. Be casual. Be confident."
-                binding.productImage.setImageResource(it.imageResId)
+                binding.productPrice.text = it.getFormattedPrice()
+                binding.productDescription.text = it.description
+
+                // Load image with Glide
+                Glide.with(this)
+                    .load(it.imageUrl)
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(binding.productImage)
+
+                // Update available sizes based on product data
+                updateAvailableSizes(it.getSizesList())
+            }
+        }
+    }
+
+    private fun updateAvailableSizes(availableSizes: List<String>) {
+        val standardSizes = listOf("XS", "S", "M", "L", "XL", "XXL")
+
+        sizeViews.forEachIndexed { index, textView ->
+            val size = standardSizes.getOrNull(index) ?: ""
+            val isAvailable = availableSizes.contains(size)
+
+            textView.isEnabled = isAvailable
+            textView.alpha = if (isAvailable) 1.0f else 0.5f
+
+            // If the currently selected size is not available, select the first available size
+            if (index == selectedSizeIndex && !isAvailable) {
+                val firstAvailableIndex = standardSizes.indexOfFirst { availableSizes.contains(it) }
+                if (firstAvailableIndex >= 0) {
+                    updateSizeSelection(firstAvailableIndex)
+                }
             }
         }
     }
